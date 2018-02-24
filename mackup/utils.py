@@ -92,17 +92,20 @@ def copy(src, dst):
 
     # Create the path to the dst file if it does not exists
     abs_path = os.path.dirname(os.path.abspath(dst))
-    if not os.path.isdir(abs_path):
+    if not os.path.isdir(abs_path) and not os.path.islink(abs_path):
         os.makedirs(abs_path)
 
     # We need to copy a single file
     if os.path.isfile(src):
         # Copy the src file to dst
-        shutil.copy(src, dst)
+        shutil.copy2(src, dst, follow_symlinks=False)
 
     # We need to copy a whole folder
     elif os.path.isdir(src):
-        shutil.copytree(src, dst)
+        if os.path.islink(src):
+            shutil.copy2(src, dst, follow_symlinks=False)
+        else:
+            shutil.copytree(src, dst, symlinks=True)
 
     # What the heck is this ?
     else:
